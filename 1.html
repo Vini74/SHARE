@@ -22,8 +22,10 @@
       border-radius: 16px; 
       box-shadow: 0 10px 40px rgba(0,0,0,0.2);
       max-width: 400px;
+      width: 90%;
     }
     .title { margin: 0 0 20px; font-size: 1.3rem; }
+    
     .btn { 
       font-size: 1.1rem; 
       padding: 14px 32px; 
@@ -32,15 +34,21 @@
       border: none; 
       border-radius: 10px; 
       cursor: pointer; 
-      transition: all 0.2s;
+      transition: background 0.2s;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
+      min-width: 220px;
+      width: fit-content;
+      box-sizing: border-box;
+      white-space: nowrap;
     }
-    .btn:hover { background: #5568d3; transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
+    .btn:hover { background: #5568d3; }
+    .btn:active { background: #4a5bb8; }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .status { margin-top: 15px; font-size: 0.9rem; color: #666; }
+    
+    .status { margin-top: 15px; font-size: 0.9rem; color: #666; min-height: 1.2em; }
     audio { margin-top: 20px; width: 100%; }
   </style>
 </head>
@@ -49,7 +57,6 @@
     <h2 class="title">🎧 Аудиофайл</h2>
     <button id="playBtn" class="btn">▶️ Воспроизвести</button>
     <div id="status" class="status">Нажмите для начала</div>
-    
     <audio id="audio" src="1.mp3" preload="auto"></audio>
   </div>
 
@@ -61,7 +68,7 @@
     function updateUI() {
       if (audio.paused) {
         btn.innerHTML = '▶️ Воспроизвести';
-        status.textContent = 'Нажмите для продолжения';
+        status.textContent = audio.currentTime > 0 ? 'Нажмите для продолжения' : 'Нажмите для начала';
       } else {
         btn.innerHTML = '⏸ Пауза';
         status.textContent = 'Воспроизведение...';
@@ -69,19 +76,12 @@
       btn.disabled = false;
     }
 
-    // Инициализация
     updateUI();
 
-    // Обработчик кнопки
     btn.addEventListener('click', async () => {
-      btn.disabled = true; // защита от многократных кликов
-      
+      btn.disabled = true;
       try {
-        if (audio.paused) {
-          await audio.play();
-        } else {
-          audio.pause();
-        }
+        audio.paused ? await audio.play() : audio.pause();
         updateUI();
       } catch (err) {
         console.error('Ошибка:', err);
@@ -90,7 +90,6 @@
       }
     });
 
-    // Обработка внешних событий (например, завершение файла)
     audio.addEventListener('pause', updateUI);
     audio.addEventListener('play', updateUI);
     audio.addEventListener('ended', () => {
@@ -98,8 +97,6 @@
       status.textContent = 'Воспроизведение завершено';
       btn.disabled = false;
     });
-
-    // Обработка ошибок загрузки
     audio.addEventListener('error', () => {
       status.textContent = '❌ Не удалось загрузить аудио';
       btn.disabled = false;
