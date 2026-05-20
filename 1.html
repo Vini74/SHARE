@@ -1,8 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Аудио</title>
+  <style>
+    body { 
+      font-family: system-ui, sans-serif; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      min-height: 100vh; 
+      margin: 0; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+    }
+    .player { 
+      text-align: center; 
+      background: white; 
+      padding: 30px 40px; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      max-width: 400px;
+    }
+    .title { margin: 0 0 20px; font-size: 1.3rem; }
+    .btn { 
+      font-size: 1.1rem; 
+      padding: 14px 32px; 
+      background: #667eea; 
+      color: white; 
+      border: none; 
+      border-radius: 10px; 
+      cursor: pointer; 
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:hover { background: #5568d3; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .status { margin-top: 15px; font-size: 0.9rem; color: #666; }
+    audio { margin-top: 20px; width: 100%; }
+  </style>
+</head>
 <body>
-<audio controls autoplay>
-  <source src="https://raw.githubusercontent.com/Vini74/SHARE/main/1.mp3" type="audio/mpeg">
-</audio>
+  <div class="player">
+    <h2 class="title">🎧 Аудиофайл</h2>
+    <button id="playBtn" class="btn">▶️ Воспроизвести</button>
+    <div id="status" class="status">Нажмите для начала</div>
+    
+    <audio id="audio" src="1.mp3" preload="auto"></audio>
+  </div>
+
+  <script>
+    const btn = document.getElementById('playBtn');
+    const audio = document.getElementById('audio');
+    const status = document.getElementById('status');
+
+    function updateUI() {
+      if (audio.paused) {
+        btn.innerHTML = '▶️ Воспроизвести';
+        status.textContent = 'Нажмите для продолжения';
+      } else {
+        btn.innerHTML = '⏸ Пауза';
+        status.textContent = 'Воспроизведение...';
+      }
+      btn.disabled = false;
+    }
+
+    // Инициализация
+    updateUI();
+
+    // Обработчик кнопки
+    btn.addEventListener('click', async () => {
+      btn.disabled = true; // защита от многократных кликов
+      
+      try {
+        if (audio.paused) {
+          await audio.play();
+        } else {
+          audio.pause();
+        }
+        updateUI();
+      } catch (err) {
+        console.error('Ошибка:', err);
+        status.textContent = '❌ Ошибка воспроизведения';
+        btn.disabled = false;
+      }
+    });
+
+    // Обработка внешних событий (например, завершение файла)
+    audio.addEventListener('pause', updateUI);
+    audio.addEventListener('play', updateUI);
+    audio.addEventListener('ended', () => {
+      btn.innerHTML = '🔄 Начать сначала';
+      status.textContent = 'Воспроизведение завершено';
+      btn.disabled = false;
+    });
+
+    // Обработка ошибок загрузки
+    audio.addEventListener('error', () => {
+      status.textContent = '❌ Не удалось загрузить аудио';
+      btn.disabled = false;
+    });
+  </script>
 </body>
 </html>
